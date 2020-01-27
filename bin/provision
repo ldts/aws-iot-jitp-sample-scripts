@@ -23,9 +23,10 @@ cat "$DEVICE.crt.tmp" "$CA.ca.pem" > "$DEVICE.crt"
 rm "$DEVICE.crt.tmp"
 rm "$DEVICE.csr"
 
-endpoint=$(aws iot describe-endpoint --endpoint-type iot:Data-ATS | jq -r .endpointAddress )
+aws iot describe-endpoint --endpoint-type iot:Data-ATS > endpoint.file
+endpoint=`cat endpoint.file`
+rm endpoint.file
 
-mosquitto_pub --cafile certs/AmazonRootCA1.pem --cert $DEVICE.crt --key $DEVICE.key \
-	-h $endpoint -p 8883 -q 0 -i $DEVICE -d --tls-version tlsv1.2 -m '' -t '/register'
-mosquitto_pub --cafile certs/AmazonRootCA1.pem --cert $DEVICE.crt --key $DEVICE.key \
-	-h $endpoint -p 8883 -q 0 -i $DEVICE -d --tls-version tlsv1.2 -m '' -t '/register'
+mosquitto_pub --cafile certs/AmazonRootCA1.pem --cert $DEVICE.crt --key $DEVICE.key -h $endpoint -p 8883 -q 0 -i $DEVICE -d -m '' -t '/register'
+mosquitto_pub --cafile certs/AmazonRootCA1.pem --cert $DEVICE.crt --key $DEVICE.key -h $endpoint -p 8883 -q 0 -i $DEVICE -d -m '' -t '/register'
+

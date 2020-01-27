@@ -13,7 +13,9 @@ fi
 shift
 message="$@"
 
-endpoint=$(aws iot describe-endpoint --endpoint-type iot:Data-ATS | jq -r .endpointAddress )
+aws iot describe-endpoint --endpoint-type iot:Data-ATS > endpoint.file
+endpoint=`cat endpoint.file`
+rm endpoint.file
 
 if [[ -z "$endpoint" ]]; then
 	echo "Could not discover AWS IoT Endpoint"
@@ -21,4 +23,4 @@ if [[ -z "$endpoint" ]]; then
 fi
 
 echo "Connecting $thingName to $endpoint"
-mosquitto_pub -d --cafile certs/AmazonRootCA1.pem  --cert $thingName.crt --key $thingName.key -h $endpoint -p 8883 -q 0 -t $thingName -i $thingName --tls-version tlsv1.2 -m "$message"
+mosquitto_pub -d --cafile certs/AmazonRootCA1.pem  --cert $thingName.crt --key $thingName.key -h $endpoint -p 8883 -q 0 -t $thingName -i $thingName -m "$message"

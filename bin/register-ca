@@ -10,7 +10,9 @@ if [[ -z "$AWS_ACCOUNT" ]]; then
 	exit
 fi
 
-SUB=`aws iot get-registration-code | jq -r '.["registrationCode"]'`
+aws iot get-registration-code > registration.code
+SUB=`cat  registration.code`
+rm registration.code
 openssl req -new -key "$CA.ca.key" -out verificationCert.csr -subj "/CN=$SUB"
 openssl x509 -req -in verificationCert.csr -CA "$CA.ca.pem" -CAkey "$CA.ca.key" -CAcreateserial -out verificationCert.pem -days 500 -sha256
 mkdir -p tmp
